@@ -58,14 +58,14 @@ def mapping_hipparcos_catalog_nasaconfirmed():
         print(f"{hip_id}: {soltype_list}")
 
     # Save to CSV
-    with open('hip_ids.csv', mode='w', newline='') as file:
+    with open('cps.csv', mode='w', newline='') as file:
         writer = csv.writer(file)
         writer.writerow(['HIP_ID', 'Solution_Types'])
         for hip_id in sorted_hips:
             soltype_list = ', '.join(sorted(hip_soltype_map[hip_id]))
             writer.writerow([hip_id, 'PC'])
 
-    print(f"\nData saved to {'hip_ids.csv'}")
+    print(f"\nData saved to {'cps.csv'}")
 
 # Example call:
 # mapping_hipparcos_catalog_nasaconfirmed()
@@ -141,11 +141,16 @@ def map_combined_hipparcos(match_radius_arcsec = 5):
     # Prepare a list of selected fields for output
     output_rows = []
 
+    # for hip_star, comb_star in zip(matched_hip, matched_combined):
+    #     output_rows.append({
+    #         'HIP': hip_star['HIP'],
+    #         'RAhms': hip_star['RAhms'],
+    #         'DEdms': hip_star['DEdms'],
+    #         'TFOPWG Disposition': comb_star['TFOPWG Disposition']
+    #     })
     for hip_star, comb_star in zip(matched_hip, matched_combined):
         output_rows.append({
             'HIP': hip_star['HIP'],
-            'RAhms': hip_star['RAhms'],
-            'DEdms': hip_star['DEdms'],
             'TFOPWG Disposition': comb_star['TFOPWG Disposition']
         })
 
@@ -153,7 +158,7 @@ def map_combined_hipparcos(match_radius_arcsec = 5):
     output_df = pd.DataFrame(output_rows)
 
     # Save to CSV
-    output_df.to_csv('matched_hipparcos_filtered.csv', index=False)
+    output_df.to_csv('fps.csv', index=False)
      # Output matched Hipparcos entries to a CSV file
     # selected = matched_hip[['HIP', 'RAhms', 'DEdms', 'TFOPWG Disposition']]
     # matched_hip.write('matched_hipparcos.csv', format='csv', overwrite=True)
@@ -161,8 +166,8 @@ def map_combined_hipparcos(match_radius_arcsec = 5):
     return matched_hip
 
 def main():
-    mapping_hipparcos_catalog_nasaconfirmed()
+    # mapping_hipparcos_catalog_nasaconfirmed()
     # combined_catalog = combine_toi_koi('TOIs.csv', 'KOIs.csv', 'combined_catalog.csv')
-    # map_combined_hipparcos()
+    map_combined_hipparcos()
 if __name__ == "__main__":
     main()

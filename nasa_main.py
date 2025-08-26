@@ -5,6 +5,7 @@ import pandas as pd
 from collections import Counter
 import numpy as np
 import re
+import csv
 
 # Function to convert string to integer for sorting
 def convert_to_int(x):
@@ -14,95 +15,60 @@ def convert_to_int(x):
         return (1, x)       # Tuple with 1 for strings
     
 def mapping_hipparcos_catalog_nasaconfirmed():
-    # Load Hipparcos catalog data (with RA, Dec)
-
+    # Load Hipparcos catalog data (not used directly here but can be)
     hip_data = Table.read('hipparcos_catalog.fits')
 
-    # Load exoplanet host data with coordinates
+    # Load exoplanet host data with coordinates and solution type
     exo_hosts = Table.read('exo_hosts.csv', format='csv', comment='#')
 
-    # Get all hip_name values
+    # Extract hip_name and soltype columns
     hip_names = exo_hosts['hip_name']
+    soltypes = exo_hosts['soltype']
 
-    # Count distinct values (excluding None/nan)
-    hip_name_counts = Counter([str(name) for name in hip_names if name])# Create mask for non-null hip_names
-    mask = (exo_hosts['hip_name'] != '') & ~exo_hosts['hip_name'].mask
-    valid_hip_names = exo_hosts[mask]
+    # Create mask for non-null, non-empty hip_name
+    mask = (exo_hosts['hip_name'] != '') & (~exo_hosts['hip_name'].mask.astype(bool))
+    valid_hip_hosts = exo_hosts[mask]
 
-    # Clean names by removing 'HIP' prefix
-    clean_names = set()
-    for name in valid_hip_names['hip_name']:
+    # Dictionary to hold HIP IDs and corresponding solution types (may have multiple entries)
+    hip_soltype_map = {}
+
+    # Regex pattern to extract numeric part after 'HIP' prefix
+    pattern = re.compile(r'HIP\s*(\d+)')
+
+    for row in valid_hip_hosts:
+        name = row['hip_name']
+        soltype = row['soltype']
         if name and not isinstance(name, np.ma.core.MaskedConstant):
-            # Extract numeric part after 'HIP', ignoring suffixes
-            match = re.search(r'HIP\s*(\d+)', name)
+            match = pattern.search(name)
             if match:
-                clean_name = match.group(1)  # Just the number as string
-                clean_names.add(clean_name)
+                clean_name = match.group(1)  # Numeric part as string
+                if clean_name in hip_soltype_map:
+                    hip_soltype_map[clean_name].add(soltype)
+                else:
+                    hip_soltype_map[clean_name] = {soltype}
+
+    # Sort the HIP IDs
+    sorted_hips = sorted(hip_soltype_map.keys(), key=convert_to_int)
 
     # Print results
-    print(f"Total number of distinct HIP IDs: {len(clean_names)}")
+    print(f"Total number of distinct HIP IDs: {len(sorted_hips)}\n")
+    print("Sorted HIP IDs (without 'HIP' prefix) and their solution types:")
+    for hip_id in sorted_hips:
+        soltype_list = ', '.join(sorted(hip_soltype_map[hip_id]))
+        print(f"{hip_id}: {soltype_list}")
 
-    # Print sorted list
-    print("\nSorted HIP IDs (without 'HIP' prefix):")
-    for name in sorted(clean_names, key=convert_to_int):
-        print(name)
-    # # Print results
-    # print("Distinct hip_names and their counts:")
-    # for name, count in hip_name_counts.most_common():
-    #     print(f"{name}: {count}")
+    # Save to CSV
+    with open('hip_ids.csv', mode='w', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow(['HIP_ID', 'Solution_Types'])
+        for hip_id in sorted_hips:
+            soltype_list = ', '.join(sorted(hip_soltype_map[hip_id]))
+            writer.writerow([hip_id, 'PC'])
 
-    # # Print total number of distinct valueship_name_counts
-    # print(f"\nTotal number of distinct hip_names: {len(hip_name_counts)}")
-    # # exo_hosts_df = pd.read_csv('exo_hosts.csv')
-    # # exo_hosts = Table.from_pandas(exo_hosts_df)
+    print(f"\nData saved to {'hip_ids.csv'}")
 
-    # # Create SkyCoord objects for both catalogs
-
-    # # Convert sexagesimal strings to Angle objects (hours/minutes/seconds for RA, degrees/arcmin/arcsec for Dec)
-    # # RA is in hours:minutes:seconds, so specify unit='hourangle'
-    # ra_angles = Angle(hip_data['RAhms'], unit='hourangle')
-
-    # # Dec is in degrees:arcmin:arcsec, so specify unit='deg'
-    # dec_angles = Angle(hip_data['DEdms'], unit='deg')
-
-    # # Create SkyCoord object
-    # hip_coords = SkyCoord(ra=ra_angles, dec=dec_angles, frame='icrs')
-
-    # print(hip_coords[:5])
-    # exo_coords = SkyCoord(ra=exo_hosts['ra']*u.degree, dec=exo_hosts['dec']*u.degree)
-
-    # # Cross-match with a 2 arcsecond tolerance
-    # idx, d2d, _ = exo_coords.match_to_catalog_sky(hip_coords)
-    # max_sep = 2 * u.arcsec
-    # matches = d2d < max_sep
-
-    # # Matched Hipparcos entries
-    # matched_hip = hip_data[idx[matches]]
-    # matched_exo = exo_hosts[matches]
-    # print(f"Found {len(matched_hip)} matches within {max_sep.to(u.arcsec)}")
-    # Show records from exo_hosts where hip_name is '43587'
-    # print("Exoplanet hosts with HIP 43587:")
-    # mask = exo_hosts['hip_name'] == 'HIP 43587'
-    # print(exo_hosts[mask]['pl_name','soltype'])
-
-    # print("Detailed records for 55 Cnc b:")
-    # mask = exo_hosts['hip_name'] == 'HIP 43587'
-    # # Show more columns to identify differences
-    # print(exo_hosts[mask]['pl_name', 'soltype', 'disc_year'])
-    #Create mask for non-null hip_names
-    # Print sorted list with proper type handling
-
-    # Get valid hip names and remove 'HIP' prefix
-    # Create output file and print sorted list
-    with open('hip_ids.txt', 'w') as f:
-        # f.write(f"Total number of distinct HIP IDs: {len(clean_names)}\n")
-        # f.write("\nSorted HIP IDs (without 'HIP' prefix):\n")
-        # print("\nSorted HIP IDs (without 'HIP' prefix):")
-        for name in sorted(clean_names, key=convert_to_int):
-            f.write(f"{name}\n")
-            print(name)
-    
-    print("\nResults have been saved to 'hip_ids.txt'")
+# Example call:
+# mapping_hipparcos_catalog_nasaconfirmed()
 
 # Example usage:
 # combined_catalog = combine_toi_koi('TOIs.csv', 'KOIs.csv', 'combined_catalog.csv')
@@ -195,8 +161,8 @@ def map_combined_hipparcos(match_radius_arcsec = 5):
     return matched_hip
 
 def main():
-    # mapping_hipparcos_catalog_nasaconfirmed()
+    mapping_hipparcos_catalog_nasaconfirmed()
     # combined_catalog = combine_toi_koi('TOIs.csv', 'KOIs.csv', 'combined_catalog.csv')
-    map_combined_hipparcos()
+    # map_combined_hipparcos()
 if __name__ == "__main__":
     main()

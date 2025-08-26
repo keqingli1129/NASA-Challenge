@@ -95,9 +95,9 @@ def mapping_hipparcos_catalog_nasaconfirmed():
     # Get valid hip names and remove 'HIP' prefix
     # Create output file and print sorted list
     with open('hip_ids.txt', 'w') as f:
-        f.write(f"Total number of distinct HIP IDs: {len(clean_names)}\n")
-        f.write("\nSorted HIP IDs (without 'HIP' prefix):\n")
-        print("\nSorted HIP IDs (without 'HIP' prefix):")
+        # f.write(f"Total number of distinct HIP IDs: {len(clean_names)}\n")
+        # f.write("\nSorted HIP IDs (without 'HIP' prefix):\n")
+        # print("\nSorted HIP IDs (without 'HIP' prefix):")
         for name in sorted(clean_names, key=convert_to_int):
             f.write(f"{name}\n")
             print(name)
@@ -172,19 +172,31 @@ def map_combined_hipparcos(match_radius_arcsec = 5):
     matched_combined = combined[idx[match_mask]]
     print(f"Found {len(matched_hip)} matches within {match_radius_arcsec} arcseconds")
     print("\nMatched Hipparcos stars:")
+    # Prepare a list of selected fields for output
+    output_rows = []
+
     for hip_star, comb_star in zip(matched_hip, matched_combined):
-        print(f"HIP {hip_star['HIP']}: "
-              f"RA={hip_star['RAhms']}, "
-              f"Dec={hip_star['DEdms']}, "
-              f"TESS Disposition={comb_star['TFOPWG Disposition']}")
+        output_rows.append({
+            'HIP': hip_star['HIP'],
+            'RAhms': hip_star['RAhms'],
+            'DEdms': hip_star['DEdms'],
+            'TFOPWG Disposition': comb_star['TFOPWG Disposition']
+        })
+
+    # Convert to pandas DataFrame
+    output_df = pd.DataFrame(output_rows)
+
+    # Save to CSV
+    output_df.to_csv('matched_hipparcos_filtered.csv', index=False)
      # Output matched Hipparcos entries to a CSV file
-    matched_hip.write('matched_hipparcos.csv', format='csv', overwrite=True)
+    # selected = matched_hip[['HIP', 'RAhms', 'DEdms', 'TFOPWG Disposition']]
+    # matched_hip.write('matched_hipparcos.csv', format='csv', overwrite=True)
     print("Matched Hipparcos entries saved to matched_hipparcos.csv")
     return matched_hip
 
 def main():
-    mapping_hipparcos_catalog_nasaconfirmed()
+    # mapping_hipparcos_catalog_nasaconfirmed()
     # combined_catalog = combine_toi_koi('TOIs.csv', 'KOIs.csv', 'combined_catalog.csv')
-    # map_combined_hipparcos()
+    map_combined_hipparcos()
 if __name__ == "__main__":
     main()

@@ -93,7 +93,16 @@ def mapping_hipparcos_catalog_nasaconfirmed():
     # Print sorted list with proper type handling
 
     # Get valid hip names and remove 'HIP' prefix
-
+    # Create output file and print sorted list
+    with open('hip_ids.txt', 'w') as f:
+        f.write(f"Total number of distinct HIP IDs: {len(clean_names)}\n")
+        f.write("\nSorted HIP IDs (without 'HIP' prefix):\n")
+        print("\nSorted HIP IDs (without 'HIP' prefix):")
+        for name in sorted(clean_names, key=convert_to_int):
+            f.write(f"{name}\n")
+            print(name)
+    
+    print("\nResults have been saved to 'hip_ids.txt'")
 
 # Example usage:
 # combined_catalog = combine_toi_koi('TOIs.csv', 'KOIs.csv', 'combined_catalog.csv')
@@ -132,8 +141,50 @@ def combine_toi_koi(toi_csv, koi_csv, output_csv, match_radius_arcsec=2.0):
     
     return combined
 
+def map_combined_hipparcos(match_radius_arcsec = 5):
+    # Load catalogs
+    combined = Table.read('combined_catalog.csv', format='csv', comment='#', encoding='utf-8')
+    hip = Table.read('hipparcos_catalog.fits')
+    print(hip.colnames)
+    # # Clean combined catalog data
+    # mask = ~(combined['RA'].mask | combined['Dec'].mask)
+    # combined_clean = combined[mask]
+    
+    # # Clean Hipparcos data - check for null/invalid values instead of masks
+    # hip_mask = (hip['RAhms'] != '') & (hip['DEdms'] != '')
+    # hip_clean = hip[hip_mask]
+    
+    # Combined catalog coords - RA and Dec in degrees as floats
+    combined_coords = SkyCoord(ra=combined['RA']*u.degree, dec=combined['Dec']*u.degree, frame='icrs')
+
+    # Hipparcos coords - parse sexagesimal strings for RA and Dec
+    hip_coords = SkyCoord(ra=hip['RAhms'], dec=hip['DEdms'], unit=(u.hourangle, u.deg), frame='icrs')
+    
+    # hip_coords_epoch = hip_coords.apply_space_motion(new_obstime='J2015.5')
+    # Cross-match catalogs
+    idx, d2d, _ = hip_coords.match_to_catalog_sky(combined_coords)
+    
+    # Filter matches
+    match_mask = d2d < match_radius_arcsec * u.arcsec
+    
+    # Get matched entries
+    matched_hip = hip[match_mask]
+    matched_combined = combined[idx[match_mask]]
+    print(f"Found {len(matched_hip)} matches within {match_radius_arcsec} arcseconds")
+    print("\nMatched Hipparcos stars:")
+    for hip_star, comb_star in zip(matched_hip, matched_combined):
+        print(f"HIP {hip_star['HIP']}: "
+              f"RA={hip_star['RAhms']}, "
+              f"Dec={hip_star['DEdms']}, "
+              f"TESS Disposition={comb_star['TFOPWG Disposition']}")
+     # Output matched Hipparcos entries to a CSV file
+    matched_hip.write('matched_hipparcos.csv', format='csv', overwrite=True)
+    print("Matched Hipparcos entries saved to matched_hipparcos.csv")
+    return matched_hip
+
 def main():
-    # mapping_hipparcos_catalog_nasaconfirmed()
-    combined_catalog = combine_toi_koi('TOIs.csv', 'KOIs.csv', 'combined_catalog.csv')
+    mapping_hipparcos_catalog_nasaconfirmed()
+    # combined_catalog = combine_toi_koi('TOIs.csv', 'KOIs.csv', 'combined_catalog.csv')
+    # map_combined_hipparcos()
 if __name__ == "__main__":
     main()

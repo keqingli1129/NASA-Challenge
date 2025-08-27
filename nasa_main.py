@@ -165,6 +165,40 @@ def map_combined_hipparcos(match_radius_arcsec = 5):
     print("Matched Hipparcos entries saved to matched_hipparcos.csv")
     return matched_hip
 
+def generate_uid_filenames(filepath):
+    """
+    Reads a file with two fields per line, uses only the first field (ID),
+    and generates filenames like UID_0004024_PLC_001.tbl (ID padded to 7 digits).
+    """
+    filenames = []
+    with open(filepath, 'r') as f:
+        for line in f:
+            fields = line.strip().split(',')
+            if fields and fields[0].isdigit():
+                padded_id = fields[0].zfill(7)
+                filename = f"UID_{padded_id}_PLC_001.tbl"
+                filenames.append(filename)
+    return filenames
+
+# Example usage:
+# filenames = generate_uid_filenames('hip_ids.txt')
+# for fname in filenames:
+#     print(fname)
+def generate_uid_filenames_with_pandas(filepath):
+    """
+    Reads a comma-separated file with a header using pandas,
+    uses only the first field (ID), and generates filenames like UID_0004024_PLC_001.tbl.
+    """
+    df = pd.read_csv(filepath)
+    id_col = df.columns[0]  # Get the name of the first column
+    filenames = [f"UID_{str(id).zfill(7)}_PLC_001.tbl" for id in df[id_col] if str(id).isdigit()]
+    return filenames
+
+# Example usage:
+# filenames = generate_uid_filenames_with_pandas('hip_ids.txt')
+# for fname in filenames:
+#     print(fname)
+
 def combine_csv_files(file1, file2, output_file):
     """
     Combine two CPS CSV files, including only distinct HIP_IDs.
@@ -206,6 +240,9 @@ def combine_csv_files(file1, file2, output_file):
 def main():
     # mapping_hipparcos_catalog_nasaconfirmed()
     # combined_catalog = combine_toi_koi('TOIs.csv', 'KOIs.csv', 'combined_catalog.csv')
+    # map_combined_hipparcos()
+    fnames = generate_uid_filenames_with_pandas('fps.csv')
+    print(fnames)
     # map_combined_hipparcos()
     combine_csv_files('cps.csv', 'fps.csv', 'final.csv')
 if __name__ == "__main__":

@@ -165,9 +165,48 @@ def map_combined_hipparcos(match_radius_arcsec = 5):
     print("Matched Hipparcos entries saved to matched_hipparcos.csv")
     return matched_hip
 
+def combine_csv_files(file1, file2, output_file):
+    """
+    Combine two CPS CSV files, including only distinct HIP_IDs.
+    Assumes first column is HIP_ID (may have trailing letters, which are removed).
+    Writes combined distinct HIP_IDs and Solution_Types to output_file.
+    """
+    def clean_id(hip_id):
+        # Remove trailing letters, keep only numeric part
+        return ''.join(char for char in hip_id if char.isdigit())
+
+    ids = set()
+    rows = []
+
+    # Helper to process a file
+    def process_file(filename):
+        with open(filename, newline='') as f:
+            reader = csv.reader(f)
+            header = next(reader)
+            for row in reader:
+                hip_id = row[0].strip()
+                solution_type = row[1].strip() if len(row) > 1 else ''
+                clean_hip = clean_id(hip_id)
+                if clean_hip and clean_hip not in ids:
+                    ids.add(clean_hip)
+                    rows.append([clean_hip, solution_type])
+
+    process_file(file1)
+    process_file(file2)
+
+    # Write output
+    with open(output_file, 'w', newline='') as f:
+        writer = csv.writer(f)
+        writer.writerow(['HIP_ID', 'Solution_Types'])
+        writer.writerows(rows)
+
+# Example usage:
+# combine_cps_files('cps.csv', 'cps2.csv', 'combined_cps.csv')
+
 def main():
     # mapping_hipparcos_catalog_nasaconfirmed()
     # combined_catalog = combine_toi_koi('TOIs.csv', 'KOIs.csv', 'combined_catalog.csv')
-    map_combined_hipparcos()
+    # map_combined_hipparcos()
+    combine_csv_files('cps.csv', 'fps.csv', 'final.csv')
 if __name__ == "__main__":
     main()

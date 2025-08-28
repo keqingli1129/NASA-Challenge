@@ -10,6 +10,7 @@ import os
 import shutil
 import matplotlib.pyplot as plt
 from io import StringIO
+from scipy.signal import savgol_filter
 
 # Function to convert string to integer for sorting
 def convert_to_int(x):
@@ -288,14 +289,40 @@ def plot_tbl_mag_vs_bjd(tbl_filepath):
     df = df[df['Accepted'] == 1]
     # Normalize Magnitude before plotting
     mag_norm = (df['Magnitude'] - df['Magnitude'].mean()) / df['Magnitude'].std()
+    # Apply Savitzky-Golay filter to estimate trend
+    trend = savgol_filter(mag_norm, window_length=51, polyorder=3)
+
+    # Detrended magnitude (original minus trend)
+    detrended_mag = mag_norm - trend
     # Plot light curve
-    plt.scatter(df['BJD'], mag_norm, s=10, alpha=0.7)
-    plt.gca().invert_yaxis()  # Magnitude scale is inverse (brighter=lower)
-    plt.xlabel('BJD (days)')
-    plt.ylabel('Magnitude (Hp)')
-    plt.title('Hipparcos Light Curve - UID_0000065_PLC_001')
+    # plt.scatter(df['BJD'], mag_norm, s=10, alpha=0.7)
+    # plt.gca().invert_yaxis()  # Magnitude scale is inverse (brighter=lower)
+    # plt.xlabel('BJD (days)')
+    # plt.ylabel('Magnitude (Hp)')
+    # plt.title('Hipparcos Light Curve - UID_0000065_PLC_001')
+    # plt.show()
+    # Plot original and detrended light curves
+    plt.figure(figsize=(10, 6))
+
+    plt.subplot(2,1,1)
+    plt.scatter(df['BJD'], mag_norm, s=10, alpha=0.7, label='Original')
+    plt.plot(df['BJD'], trend, color='red', label='Trend (S-G filter)')
+    plt.gca().invert_yaxis()
+    plt.title('Original Hipparcos Light Curve with Trend')
+    plt.xlabel('Julian Date')
+    plt.ylabel('Magnitude')
+    plt.legend()
+
+    plt.subplot(2,1,2)
+    plt.scatter(df['BJD'], detrended_mag, s=10, alpha=0.7, color='green')
+    plt.axhline(0, color='red', linestyle='--')
+    plt.title('Detrended Light Curve (Residuals)')
+    plt.xlabel('Julian Date')
+    plt.ylabel('Magnitude (detrended)')
+    plt.gca().invert_yaxis()
+
+    plt.tight_layout()
     plt.show()
-    
 # Example usage:
 # plot_tbl_mag_vs_bjd('UID_0004024_PLC_001.tbl')
 def generate_uid_dict_from_final_csv(filepath):
@@ -322,12 +349,12 @@ def main():
     # mapping_hipparcos_catalog_nasaconfirmed()
     # combined_catalog = combine_toi_koi('TOIs.csv', 'KOIs.csv', 'combined_catalog.csv')
     # map_combined_hipparcos()
-    # fnames = generate_uid_filenames_with_pandas('final.csv')
-    # print(fnames)
+    fnames = generate_uid_filenames_with_pandas('final.csv')
+    print(fnames)
     # map_combined_hipparcos()
     # combine_csv_files('cps.csv', 'fps.csv', 'final.csv')
-    # plot_tbl_mag_vs_bjd('./data/UID_0001419_PLC_001.tbl')
-    uid_dict = generate_uid_dict_from_final_csv('final.csv')
-    print(uid_dict)
+    # plot_tbl_mag_vs_bjd('./data/UID_0001931_PLC_001.tbl')
+    # uid_dict = generate_uid_dict_from_final_csv('final.csv')
+    # print(uid_dict)
 if __name__ == "__main__":
     main()

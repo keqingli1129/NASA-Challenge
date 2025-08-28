@@ -351,8 +351,6 @@ def main():
     # map_combined_hipparcos()
     fnames = generate_uid_filenames_with_pandas('final.csv')
     print(fnames)
-    fnames = generate_uid_filenames_with_pandas('final.csv')
-    print(fnames)
     # map_combined_hipparcos()
     # combine_csv_files('cps.csv', 'fps.csv', 'final.csv')
     # plot_tbl_mag_vs_bjd('./data/UID_0001419_PLC_001.tbl')

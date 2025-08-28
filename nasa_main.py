@@ -8,6 +8,8 @@ import re
 import csv
 import os
 import shutil
+import matplotlib.pyplot as plt
+from io import StringIO
 
 # Function to convert string to integer for sorting
 def convert_to_int(x):
@@ -253,14 +255,57 @@ def combine_csv_files(file1, file2, output_file):
 
 # Example usage:
 # combine_cps_files('cps.csv', 'cps2.csv', 'combined_cps.csv')
+def plot_tbl_mag_vs_bjd(tbl_filepath):
+    """
+    Reads a .tbl file using Astropy Table, converts to pandas DataFrame,
+    and plots Magnitude vs. BJD.
+    """
+    # Read the file, skipping header lines that start with backslashes or '#' and empty lines
+    with open(tbl_filepath, 'r') as f:
+        lines = f.readlines()
+
+    # Find the line index where actual data starts (the line starting with the first BJD number)
+    data_start_idx = 0
+    for i, line in enumerate(lines):
+        line_strip = line.strip()
+        # BJD lines start with a number like 244...
+        if line_strip and (line_strip[0].isdigit() or line_strip[0] == '.'):
+            data_start_idx = i
+            break
+
+    # Extract data lines only
+    data_lines = lines[data_start_idx:]
+    from io import StringIO
+    data_str = ''.join(data_lines)
+
+    # Read data into dataframe
+    df = pd.read_csv(StringIO(data_str), delim_whitespace=True, header=None,
+                    names=['BJD', 'Magnitude', 'Magnitude_Uncertainty', 'Data_Quality_Flag', 'Accepted'])
+
+    print(df.head())  # should show numeric data only now
+
+    # Filter out non-accepted data points (Accepted column == 0)
+    df = df[df['Accepted'] == 1]
+
+    # Plot light curve
+    plt.errorbar(df['BJD'], df['Magnitude'], yerr=df['Magnitude_Uncertainty'], fmt='o', markersize=3, alpha=0.7)
+    plt.gca().invert_yaxis()  # Magnitude scale is inverse (brighter=lower)
+    plt.xlabel('BJD (days)')
+    plt.ylabel('Magnitude (Hp)')
+    plt.title('Hipparcos Light Curve - UID_0000065_PLC_001')
+    plt.show()
+    
+# Example usage:
+# plot_tbl_mag_vs_bjd('UID_0004024_PLC_001.tbl')
 
 def main():
     # mapping_hipparcos_catalog_nasaconfirmed()
     # combined_catalog = combine_toi_koi('TOIs.csv', 'KOIs.csv', 'combined_catalog.csv')
     # map_combined_hipparcos()
-    fnames = generate_uid_filenames_with_pandas('final.csv')
+    # fnames = generate_uid_filenames_with_pandas('final.csv')
     # print(fnames)
     # map_combined_hipparcos()
     # combine_csv_files('cps.csv', 'fps.csv', 'final.csv')
+    plot_tbl_mag_vs_bjd('./data/UID_0000065_PLC_001.tbl')
 if __name__ == "__main__":
     main()

@@ -6,6 +6,8 @@ from collections import Counter
 import numpy as np
 import re
 import csv
+import os
+import shutil
 
 # Function to convert string to integer for sorting
 def convert_to_int(x):
@@ -165,26 +167,41 @@ def map_combined_hipparcos(match_radius_arcsec = 5):
     print("Matched Hipparcos entries saved to matched_hipparcos.csv")
     return matched_hip
 
-def generate_uid_filenames(filepath):
+def generate_uid_filenames_with_pandas(filepath):
     """
-    Reads a file with two fields per line, uses only the first field (ID),
-    and generates filenames like UID_0004024_PLC_001.tbl (ID padded to 7 digits).
+    Reads a comma-separated file with a header using pandas,
+    uses only the first field (ID), and generates filenames like UID_0004024_PLC_001.tbl.
+    Then searches ../NASA data and its subfolders for each file, and moves found files to ./data.
     """
-    filenames = []
-    with open(filepath, 'r') as f:
-        for line in f:
-            fields = line.strip().split(',')
-            if fields and fields[0].isdigit():
-                padded_id = fields[0].zfill(7)
-                filename = f"UID_{padded_id}_PLC_001.tbl"
-                filenames.append(filename)
+    df = pd.read_csv(filepath)
+    id_col = df.columns[0]  # Get the name of the first column
+    filenames = [f"UID_{str(id).zfill(7)}_PLC_001.tbl" for id in df[id_col] if str(id).isdigit()]
+
+    # Ensure ./data directory exists
+    os.makedirs('./data', exist_ok=True)
+
+    # Search and move files
+    nasa_data_root = os.path.abspath(os.path.join('..', 'NASA data'))
+    for fname in filenames:
+        found = False
+        for root, dirs, files in os.walk(nasa_data_root):
+            if fname in files:
+                src = os.path.join(root, fname)
+                dst = os.path.join('./data', fname)
+                shutil.move(src, dst)
+                print(f"Moved: {src} -> {dst}")
+                found = True
+                break
+        if not found:
+            print(f"File not found: {fname}")
+
     return filenames
 
 # Example usage:
 # filenames = generate_uid_filenames('hip_ids.txt')
 # for fname in filenames:
 #     print(fname)
-def generate_uid_filenames_with_pandas(filepath):
+def generate_uid_filenames(filepath):
     """
     Reads a comma-separated file with a header using pandas,
     uses only the first field (ID), and generates filenames like UID_0004024_PLC_001.tbl.
@@ -241,9 +258,9 @@ def main():
     # mapping_hipparcos_catalog_nasaconfirmed()
     # combined_catalog = combine_toi_koi('TOIs.csv', 'KOIs.csv', 'combined_catalog.csv')
     # map_combined_hipparcos()
-    fnames = generate_uid_filenames_with_pandas('fps.csv')
-    print(fnames)
+    fnames = generate_uid_filenames_with_pandas('final.csv')
+    # print(fnames)
     # map_combined_hipparcos()
-    combine_csv_files('cps.csv', 'fps.csv', 'final.csv')
+    # combine_csv_files('cps.csv', 'fps.csv', 'final.csv')
 if __name__ == "__main__":
     main()

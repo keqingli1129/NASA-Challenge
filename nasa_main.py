@@ -282,13 +282,14 @@ def plot_tbl_mag_vs_bjd(tbl_filepath):
     df = pd.read_csv(StringIO(data_str), delim_whitespace=True, header=None,
                     names=['BJD', 'Magnitude', 'Magnitude_Uncertainty', 'Data_Quality_Flag', 'Accepted'])
 
-    print(df.head())  # should show numeric data only now
+    # print(df.head())  # should show numeric data only now
 
     # Filter out non-accepted data points (Accepted column == 0)
     df = df[df['Accepted'] == 1]
-
+    # Normalize Magnitude before plotting
+    mag_norm = (df['Magnitude'] - df['Magnitude'].mean()) / df['Magnitude'].std()
     # Plot light curve
-    plt.errorbar(df['BJD'], df['Magnitude'], yerr=df['Magnitude_Uncertainty'], fmt='o', markersize=3, alpha=0.7)
+    plt.scatter(df['BJD'], mag_norm, s=10, alpha=0.7)
     plt.gca().invert_yaxis()  # Magnitude scale is inverse (brighter=lower)
     plt.xlabel('BJD (days)')
     plt.ylabel('Magnitude (Hp)')
@@ -297,7 +298,26 @@ def plot_tbl_mag_vs_bjd(tbl_filepath):
     
 # Example usage:
 # plot_tbl_mag_vs_bjd('UID_0004024_PLC_001.tbl')
+def generate_uid_dict_from_final_csv(filepath):
+    """
+    Reads final.csv, uses the first field (HIP_ID) to generate filenames,
+    and the second field (Solution_Types) to create a dictionary:
+    - key: filename like UID_0004024_PLC_001.tbl
+    - value: 1 if Solution_Types is 'PC' or 'CP', else 0
+    """
+    df = pd.read_csv(filepath)
+    id_col = df.columns[0]
+    sol_col = df.columns[1]
+    uid_dict = {}
+    for idx, row in df.iterrows():
+        fname = f"UID_{str(row[id_col]).zfill(7)}_PLC_001.tbl"
+        value = 1 if str(row[sol_col]).strip() in ['PC', 'CP'] else 0
+        uid_dict[fname] = value
+    return uid_dict
 
+# Example usage:
+# uid_dict = generate_uid_dict_from_final_csv('final.csv')
+# print(uid_dict)
 def main():
     # mapping_hipparcos_catalog_nasaconfirmed()
     # combined_catalog = combine_toi_koi('TOIs.csv', 'KOIs.csv', 'combined_catalog.csv')
@@ -306,6 +326,8 @@ def main():
     # print(fnames)
     # map_combined_hipparcos()
     # combine_csv_files('cps.csv', 'fps.csv', 'final.csv')
-    plot_tbl_mag_vs_bjd('./data/UID_0000065_PLC_001.tbl')
+    # plot_tbl_mag_vs_bjd('./data/UID_0001419_PLC_001.tbl')
+    uid_dict = generate_uid_dict_from_final_csv('final.csv')
+    print(uid_dict)
 if __name__ == "__main__":
     main()

@@ -1,0 +1,223 @@
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\                                                             \
+\ GLOBAL PROPERTIES                                           \
+\                                                             \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\STAR_ID                             = "HIP 71815A"
+\STAR_ID_DEFINED                     = "Published star name or ID number of star assigned by survey"
+\NSTED_DEFAULT_ID                    = "HIP 71815A"
+\NSTED_DEFAULT_ID_DEFINED            = "NStED default name"
+\DATA_CATEGORY                       = "Photometric Light Curve"
+\DATA_CATEGORY_DEFINED               = "Category of time series data"
+\PUBLIC                              = "Y"
+\PUBLIC_DEFINED                      = "Y if data are public; N if data are proprietary"
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\                                                             \
+\ TIME SERIES DATA BASIC PROPERTIES                           \
+\                                                             \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\NUMBER_OF_POINTS                    = "100"
+\NUMBER_OF_POINTS_DEFINED            = "Total number of data points in time series"
+\TIME_REFERENCE_FRAME                = "BJD"
+\TIME_REFERENCE_FRAME_DEFINED        = "Frame of reference of time series"
+\EXPOSURE_TIMESTAMP                  = "Unknown"
+\EXPOSURE_TIMESTAMP_DEFINED          = "Timestamp relative to exposure (Beginning, Midpoint, End, Unknown)"
+\MINIMUM_DATE                        = "2447912.87635"
+\MINIMUM_DATE_DEFINED                = "Minimum value of date in time series data"
+\MINIMUM_DATE_UNITS                  = "days"
+\MAXIMUM_DATE                        = "2448821.67143"
+\MAXIMUM_DATE_DEFINED                = "Maximum value of date in time series data"
+\MAXIMUM_DATE_UNITS                  = "days"
+\MINIMUM_VALUE                       = "8.8788"
+\MINIMUM_VALUE_DEFINED               = "Minimum value of time series data"
+\MINIMUM_VALUE_UNITS                 = "mag"
+\MAXIMUM_VALUE                       = "8.5703"
+\MAXIMUM_VALUE_DEFINED               = "Maximum value of time series data"
+\MAXIMUM_VALUE_UNITS                 = "mag"
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\                                                             \
+\ TIME SERIES DATA CHARACTERISTICS COMPUTED BY NSTED          \
+\                                                             \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\MEDIAN_VALUE                        = "8.6016"
+\MEDIAN_VALUE_DEFINED                = "Median value of data points"
+\MEDIAN_VALUE_UNITS                  = "mag"
+\MEAN_VALUE                          = "8.60315"
+\MEAN_VALUE_DEFINED                  = "Mean value of data points"
+\MEAN_VALUE_UNITS                    = "mag"
+\MEDIAN_UNCERTAINTY                  = "0.014"
+\MEDIAN_UNCERTAINTY_DEFINED          = "Median of uncertainty values"
+\MEDIAN_UNCERTAINTY_UNITS            = "mag"
+\MEDIAN_ABSOLUTE_DEVIATION           = "0.0091"
+\MEDIAN_ABSOLUTE_DEVIATION_DEFINED   = "Value of median absolute deviation statistic"
+\MEDIAN_ABSOLUTE_DEVIATION_UNITS     = "mag"
+\DISPERSION                          = "0.0145347"
+\DISPERSION_DEFINED                  = "Standard deviation with respect to MEDIAN_VALUE"
+\DISPERSION_UNITS                    = "mag"
+\DISPERSION_MEAN                     = "0.0144513"
+\DISPERSION_MEAN_DEFINED             = "Standard deviation with respect to MEAN_VALUE"
+\DISPERSION_MEAN_UNITS               = "mag"
+\CHISQUARED                          = "1.1"
+\CHISQUARED_DEFINED                  = "Value of reduced chi-squared statistic with respect to MEDIAN_VALUE"
+\NUMBER_5_SIGMA                      = "0"
+\NUMBER_5_SIGMA_DEFINED              = "Number of data points beyond 5 times DISPERSION from MEDIAN_VALUE"
+\FRACTION_5_SIGMA                    = "0"
+\FRACTION_5_SIGMA_DEFINED            = "Fraction of data points beyond 5 times DISPERSION from MEDIAN_VALUE"
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\                                                             \
+\ REFERENCES AND INFORMATION ABOUT OBSERVING SETUP            \
+\                                                             \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\REFERENCES                          = "Hipparcos and Tycho Catalogs (ESA SP-1200 (1997))"
+\REFERENCES_DEFINED                  = "Literature or other references for data"
+\BIBCODES                            = "1997HIP...C......0E"
+\BIBCODES_DEFINED                    = "ADS bibcodes for REFERENCES"
+\TELESCOPE                           = "Hipparcos Satellite"
+\TELESCOPE_DEFINED                   = "Telescope used for data acquisition"
+\INSTRUMENT                          = "Image Dissector Tube"
+\INSTRUMENT_DEFINED                  = "Instrument used for data acquisition"
+\TIME_SERIES_DATA_FILTER             = "Hp (Hipparcos)"
+\TIME_SERIES_DATA_FILTER_DEFINED     = "Filter in which time series monitoring was performed"
+\DATA_QUALITY_FLAG_REFERENCE         = "The Hipparcos and Tycho Catalogues, Vol 1, Pt 2.5, Hipparcos Epoch Photometry Annex (and Extension), pp 215 ff, http://www.rssd.esa.int/SA/HIPPARCOS/docs/vol1_all.pdf"
+\DATA_QUALITY_FLAG_REFERENCE_DEFINED = "Reference for explanation of column Data_Quality_Flag"
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\                                                             \
+\ COMMENTS AND NOTES                                          \
+\                                                             \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\NOTE1                               = "This light curve file contains 100 measurements and is plotted by the NStED visualizer as Magnitude (mag) vs. BJD (days)."
+\NOTE2                               = "This data set covers BJD between 2447912.87635 and 2448821.67143 days BJD, and the range of Magnitude is between 8.8788 and 8.5703 mag."
+\NOTE3                               = "NStED serves the data contained in this file as they were reported in the literature or as they were delivered to the archive.  Data were not altered unless an error was discovered.  Any data corrections are listed in the header comments and have been confirmed with the original authors."
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\                                                             \
+\ NSTED ARCHIVE FILE INFORMATION                              \
+\                                                             \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\NSTED_FILE_CREATION_DATE            = "Sun Feb 20 06:46:58 2011 UTC"
+\CONTACT_LINK                        = "http://nsted.ipac.caltech.edu/applications/Helpdesk"
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\                                                             \
+\ NSTED INTERNAL KEYWORDS (NEEDED FOR TIME SERIES VIEWER)     \
+\                                                             \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\X_AXIS                              = "BJD"
+\X_AXIS_UNITS                        = "days"
+\Y_AXIS                              = "Magnitude"
+\Y_AXIS_UNITS                        = "mag"
+\Y_AXIS_UNCERTAINTY                  = "Magnitude_Uncertainty"
+\Y_AXIS_UNCERTAINTY_UNITS            = "mag"
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\                                                             \
+\ DESCRIPTION OF COLUMN HEADERS                               \
+\                                                             \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\COLUMN_BJD                          = "Barycentric Julian date of observation"
+\COLUMN_MAGNITUDE                    = "Magnitude in TIME_SERIES_DATA_FILTER"
+\COLUMN_MAGNITUDE_UNCERTAINTY        = "Uncertainty in MAGNITUDE"
+\COLUMN_DATA_QUALITY_FLAG            = "Data quality flag provided by HIPPARCOS project (9-bit integer, bit-packed)"
+\COLUMN_ACCEPTED                     = "1 if value was used by NStED in computing statistics; 0 otherwise"
+\ 
+\ 
+|           BJD | Magnitude | Magnitude_Uncertainty | Data_Quality_Flag | Accepted |
+|        double |    double |                double |               int |      int |
+|          days |       mag |                   mag |                   |          |
+  2447912.87635      8.6029                   0.012                   0          1  
+  2447912.89068      8.6068                   0.013                   0          1  
+  2447937.41694      8.6117                   0.014                   1          1  
+  2447937.49150      8.6035                   0.011                   0          1  
+  2447937.50587      8.6017                   0.011                   0          1  
+  2447959.26494      8.6188                   0.015                   2          1  
+  2447959.27930      8.6094                   0.017                   0          1  
+  2447959.35386      8.6202                   0.014                   0          1  
+  2447959.36818      8.5882                   0.014                   0          1  
+  2447959.44273      8.6061                   0.014                   0          1  
+  2447959.45707      8.6178                   0.019                   0          1  
+  2448081.45608      8.6079                   0.015                   0          1  
+  2448081.47039      8.5875                   0.014                   0          1  
+  2448081.54498      8.6424                   0.013                   2          1  
+  2448081.55930      8.6250                   0.013                   0          1  
+  2448081.63385      8.6205                   0.012                   0          1  
+  2448081.64817      8.6091                   0.018                   1          1  
+  2448103.58206      8.6122                   0.012                   0          1  
+  2448103.59635      8.6141                   0.012                   0          1  
+  2448103.67091      8.6400                   0.014                  16          0  
+  2448103.68526      8.6188                   0.012                   0          1  
+  2448130.41468      8.6159                   0.014                   0          1  
+  2448130.42900      8.6000                   0.020                   0          1  
+  2448260.81937      8.6147                   0.018                   0          1  
+  2448260.89393      8.6021                   0.011                   0          1  
+  2448260.90826      8.5982                   0.011                   0          1  
+  2448277.08419      8.6071                   0.012                   2          1  
+  2448277.15874      8.6017                   0.012                   0          1  
+  2448306.12557      8.5955                   0.012                   0          1  
+  2448306.13987      8.5859                   0.013                   0          1  
+  2448306.22878      8.6267                   0.021                   0          1  
+  2448431.79621      8.5983                   0.013                   8          0  
+  2448431.81049      8.8788                   0.024                  42          0  
+  2448431.97398      8.5953                   0.012                   0          1  
+  2448431.98824      8.5902                   0.014                   0          1  
+  2448432.06285      8.5789                   0.010                   0          1  
+  2448432.07716      8.6137                   0.015                   0          1  
+  2448432.15172      8.6016                   0.013                   0          1  
+  2448432.16603      8.5969                   0.014                   1          1  
+  2448432.24060      8.5846                   0.011                   8          0  
+  2448432.25494      8.5998                   0.013                   2          1  
+  2448432.41839      8.5751                   0.015                   2          1  
+  2448432.43267      8.6130                   0.015                   2          1  
+  2448432.50724      8.5914                   0.012                   0          1  
+  2448432.52157      8.5987                   0.018                   0          1  
+  2448432.59611      8.5966                   0.012                   0          1  
+  2448432.61046      8.5943                   0.013                   0          1  
+  2448432.68502      8.5989                   0.013                   8          0  
+  2448432.69932      8.6003                   0.016                  10          0  
+  2448432.86279      8.5809                   0.012                   0          1  
+  2448432.87710      8.5932                   0.014                   0          1  
+  2448432.95167      8.5846                   0.011                   0          1  
+  2448432.96595      8.5728                   0.016                   0          1  
+  2448433.04055      8.5982                   0.013                   0          1  
+  2448436.96565      8.5962                   0.013                   0          1  
+  2448437.12907      8.5778                   0.014                   2          1  
+  2448437.39573      8.6187                   0.012                   0          1  
+  2448437.41005      8.6176                   0.016                   0          1  
+  2448437.48461      8.6100                   0.016                   0          1  
+  2448437.49894      8.6063                   0.012                   0          1  
+  2448437.57351      8.5811                   0.020                  10          0  
+  2448437.76559      8.6228                   0.015                   2          1  
+  2448437.84014      8.6068                   0.018                   0          1  
+  2448437.85447      8.6001                   0.012                   0          1  
+  2448437.92901      8.6186                   0.020                   2          1  
+  2448437.94335      8.5830                   0.011                   0          1  
+  2448476.04305      8.6073                   0.014                   0          1  
+  2448476.05739      8.5887                   0.012                   0          1  
+  2448476.13192      8.5925                   0.012                   0          1  
+  2448476.14628      8.6119                   0.014                   0          1  
+  2448509.62340      8.6024                   0.015                   0          1  
+  2448509.63774      8.6337                   0.013                   0          1  
+  2448509.71231      8.5991                   0.014                   0          1  
+  2448509.72664      8.6084                   0.017                   0          1  
+  2448509.80119      8.6117                   0.019                   0          1  
+  2448509.81551      8.6009                   0.012                   0          1  
+  2448522.06552      8.6194                   0.023                   0          1  
+  2448522.07981      8.5703                   0.011                   0          1  
+  2448522.15439      8.5959                   0.016                   0          1  
+  2448522.24328      8.6041                   0.015                   0          1  
+  2448522.25760      8.6263                   0.013                   0          1  
+  2448522.33216      8.5940                   0.014                   0          1  
+  2448522.34646      8.5956                   0.015                   0          1  
+  2448652.67110      8.6000                   0.018                   0          1  
+  2448652.68544      8.6004                   0.016                   0          1  
+  2448681.28346      8.5805                   0.018                   0          1  
+  2448681.29780      8.5876                   0.012                   0          1  
+  2448681.37235      8.6250                   0.014                   0          1  
+  2448681.38670      8.6009                   0.011                   0          1  
+  2448681.46125      8.6094                   0.013                   0          1  
+  2448681.47555      8.6362                   0.029                   2          1  
+  2448698.36288      8.5935                   0.018                   0          1  
+  2448698.43749      8.6009                   0.014                   0          1  
+  2448698.45177      8.5889                   0.017                   0          1  
+  2448698.62958      8.6312                   0.024                   0          1  
+  2448698.70416      8.5951                   0.011                   0          1  
+  2448821.56820      8.6002                   0.011                   0          1  
+  2448821.58253      8.5938                   0.012                   0          1  
+  2448821.65709      8.5897                   0.013                   0          1  
+  2448821.67143      8.5916                   0.009                   0          1  

@@ -11,6 +11,7 @@ import shutil
 import matplotlib.pyplot as plt
 from io import StringIO
 from scipy.signal import savgol_filter
+import lightkurve as lk
 
 # Function to convert string to integer for sorting
 def convert_to_int(x):

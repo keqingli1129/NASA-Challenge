@@ -8,30 +8,32 @@ import logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
-def download_koi_lightcurves_complete(csv_file_path, download_dir="./koi_lightcurves", 
+def download_koi_lightcurves_complete(csv_file_path, download_dir="./koi_complete_data", 
                                     author="Kepler", cadence="long", mission="Kepler", 
-                                    get_all_available=True, specific_quarters=None, delay=1):
+                                    delay=1.5, max_targets=None):
     """
-    Download light curves for KOI targets with flexible data selection.
+    Download ALL available light curve data for targets in a KOI CSV file from Kepler/K2.
     
     Parameters:
     -----------
     csv_file_path : str
         Path to the KOI.csv file
     download_dir : str
-        Directory where light curves will be downloaded
+        Directory where light curves will be downloaded (default: "./koi_complete_data")
     author : str
-        Pipeline author ("Kepler", "K2")
+        Pipeline author ("Kepler" for original mission, "K2" for K2 mission)
     cadence : str
-        Cadence type ("long" or "short")
+        Cadence type ("long" or "short") - "long" is recommended for transit search
     mission : str
         Mission name ("Kepler" or "K2")
-    get_all_available : bool
-        If True, download ALL available quarters/sectors. If False, use specific_quarters.
-    specific_quarters : list
-        List of specific quarters/sectors to download (e.g., [1, 2, 3, 4])
     delay : float
-        Delay between downloads in seconds
+        Delay between downloads in seconds (recommended: 1.5+ to avoid server overload)
+    max_targets : int
+        If set, only process the first N targets (useful for testing)
+    
+    Returns:
+    --------
+    dict: A detailed summary of downloads
     """
     
     # Create download directory if it doesn't exist
@@ -39,8 +41,14 @@ def download_koi_lightcurves_complete(csv_file_path, download_dir="./koi_lightcu
     
     # Read the CSV file
     try:
-        koi_df = pd.read_csv(csv_file_path)
-        logger.info(f"Successfully read CSV file with {len(koi_df)} entries")
+        koi_df = pd.read_csv(csv_file_path, comment='#')
+        logger.info(f"Successfully read KOI.csv with {len(koi_df)} entries")
+        
+        # If max_targets is specified, limit the dataframe
+        if max_targets and max_targets < len(koi_df):
+            koi_df = koi_df.head(max_targets)
+            logger.info(f"Limiting to first {max_targets} targets for testing")
+            
     except Exception as e:
         logger.error(f"Failed to read CSV file: {e}")
         return {"error": f"CSV read failed: {e}"}
@@ -50,40 +58,42 @@ def download_koi_lightcurves_complete(csv_file_path, download_dir="./koi_lightcu
         "successful": [],
         "failed": [],
         "skipped": [],
-        "total_files_downloaded": 0
+        "total_files_downloaded": 0,
+        "total_data_volume_mb": 0
     }
     
     # Iterate through each KOI entry
     for index, row in koi_df.iterrows():
-        # Construct identifiers
+        # Construct identifiers - ADJUST THESE BASED ON YOUR CSV COLUMN NAMES!
         koi_id = f"KOI-{row['kepoi_name']}" if 'kepoi_name' in row else f"KOI-{row['KOI']}"
-        kic_id = f"KIC {row['kepid']}" if 'kepid' in row else koi_id
+        kic_id = f"KIC {row['kepid']}" if 'kepid' in row else None
         
-        logger.info(f"Processing {koi_id} ({index + 1}/{len(koi_df)})")
+        # Fallback: if standard column names aren't found, try common alternatives
+        if not kic_id:
+            for col in ['kic_id', 'KIC_ID', 'kicid', 'kepler_id']:
+                if col in row:
+                    kic_id = f"KIC {row[col]}"
+                    break
+        
+        # If still no KIC ID, use KOI ID as last resort
+        if not kic_id:
+            kic_id = koi_id
+            logger.warning(f"No KIC ID found for {koi_id}, using KOI ID for search")
+        
+        logger.info(f"Processing {koi_id} ({index + 1}/{len(koi_df)}) - KIC: {kic_id}")
         
         # Create a subdirectory for this target
-        target_dir = os.path.join(download_dir, koi_id.replace(' ', '_').replace('.', '_'))
+        target_dir = os.path.join(download_dir, koi_id.replace(' ', '_').replace('.', '_').replace('/', '_'))
         os.makedirs(target_dir, exist_ok=True)
         
         try:
-            # Search for light curves - THIS IS WHERE WE GET "ALL AVAILABLE"
-            if get_all_available:
-                # Get ALL available data without filtering by quarter
-                search_result = lk.search_lightcurve(
-                    target=kic_id, 
-                    author=author, 
-                    cadence=cadence,
-                    mission=mission
-                )
-            else:
-                # Get specific quarters only
-                search_result = lk.search_lightcurve(
-                    target=kic_id, 
-                    author=author, 
-                    cadence=cadence,
-                    mission=mission,
-                    quarter=specific_quarters  # This filters to specific quarters
-                )
+            # Search for ALL available light curves - no quarter filtering!
+            search_result = lk.search_lightcurve(
+                target=kic_id, 
+                author=author, 
+                cadence=cadence,
+                mission=mission
+            )
             
             if len(search_result) == 0:
                 logger.warning(f"No data found for {koi_id} (KIC: {kic_id})")
@@ -92,25 +102,29 @@ def download_koi_lightcurves_complete(csv_file_path, download_dir="./koi_lightcu
             
             logger.info(f"Found {len(search_result)} observations for {koi_id}")
             
-            # Check if we already have all these files
-            expected_files = len(search_result)
+            # Count existing files before download
             existing_files = [f for f in os.listdir(target_dir) if f.endswith('.fits')]
             
-            if len(existing_files) >= expected_files:
+            if len(existing_files) >= len(search_result):
                 logger.info(f"Skipping {koi_id} - already has {len(existing_files)} files")
-                results["skipped"].append(koi_id)
+                results["skipped"].append((koi_id, len(existing_files)))
                 continue
             
-            # Download all light curves for this target
+            # Download ALL light curves for this target
+            logger.info(f"Downloading {len(search_result)} files for {koi_id}...")
             light_curve_collection = search_result.download_all(download_dir=target_dir)
             
-            # Count downloaded files
+            # Count downloaded files and calculate size
             downloaded_files = [f for f in os.listdir(target_dir) if f.endswith('.fits')]
             new_files = len(downloaded_files) - len(existing_files)
             
-            logger.info(f"Successfully downloaded {new_files} new files for {koi_id} (total: {len(downloaded_files)})")
-            results["successful"].append((koi_id, new_files))
+            # Calculate approximate data size (typical Kepler FITS: 5-15 MB each)
+            data_size_mb = new_files * 10  # Rough estimate
+            
+            logger.info(f"Successfully downloaded {new_files} new files for {koi_id} (~{data_size_mb} MB)")
+            results["successful"].append((koi_id, new_files, data_size_mb))
             results["total_files_downloaded"] += new_files
+            results["total_data_volume_mb"] += data_size_mb
             
         except Exception as e:
             error_msg = f"Failed to download {koi_id}: {str(e)}"
@@ -120,39 +134,51 @@ def download_koi_lightcurves_complete(csv_file_path, download_dir="./koi_lightcu
         # Add delay to be polite to the servers
         sleep(delay)
     
-    # Print summary
-    logger.info("\n" + "="*50)
-    logger.info("DOWNLOAD SUMMARY:")
-    logger.info(f"Successful: {len(results['successful'])} targets")
-    logger.info(f"New files downloaded: {results['total_files_downloaded']}")
+    # Print comprehensive summary
+    logger.info("\n" + "="*60)
+    logger.info("KOI DOWNLOAD SUMMARY:")
+    logger.info(f"Targets processed: {len(koi_df)}")
+    logger.info(f"Successfully downloaded: {len(results['successful'])} targets")
+    logger.info(f"Total files downloaded: {results['total_files_downloaded']}")
+    logger.info(f"Total data volume: ~{results['total_data_volume_mb']} MB")
     logger.info(f"Failed: {len(results['failed'])} targets")
-    logger.info(f"Skipped (already downloaded): {len(results['skipped'])} targets")
-    logger.info("="*50)
+    logger.info(f"Skipped (already complete): {len(results['skipped'])} targets")
+    logger.info("="*60)
+    
+    # Print list of failed targets for debugging
+    if results['failed']:
+        logger.info("Failed targets:")
+        for target, error in results['failed']:
+            logger.info(f"  - {target}: {error}")
     
     return results
 
-# Example usage scenarios
+# Example usage
 if __name__ == "__main__":
     
-    # Scenario 1: Download ALL available data for all KOIs (DEFAULT)
-    results_all = download_koi_lightcurves_complete(
-        csv_file_path="KOI.csv",
-        download_dir="./koi_all_data",
-        get_all_available=True  # This is the default
+    print("KOI Light Curve Download Script")
+    print("=" * 40)
+    
+    # TEST FIRST with just 2-3 targets!
+    test_results = download_koi_lightcurves_complete(
+        csv_file_path="KOIs.csv",
+        download_dir="./koi_test_data",
+        author="Kepler",
+        cadence="long",
+        mission="Kepler",
+        delay=2.0,  # Longer delay for safety
+        max_targets=3  # ONLY download first 3 targets for testing
     )
     
-    # Scenario 2: Download only specific quarters (e.g., first 4 quarters)
-    results_specific = download_koi_lightcurves_complete(
-        csv_file_path="KOI.csv",
-        download_dir="./koi_q1-4_data",
-        get_all_available=False,
-        specific_quarters=[1, 2, 3, 4]  # Only these quarters
-    )
+    print("\nTest completed. Check the log above.")
+    print("If successful, run without 'max_targets' parameter for full download.")
     
-    # Scenario 3: Download all K2 data instead of Kepler
-    results_k2 = download_koi_lightcurves_complete(
-        csv_file_path="K2_KOI.csv",
-        download_dir="./k2_all_data",
-        author="K2",
-        mission="K2"
-    )
+    # UNCOMMENT FOR FULL DOWNLOAD (after testing):
+    # full_results = download_koi_lightcurves_complete(
+    #     csv_file_path="KOI.csv",
+    #     download_dir="./koi_full_data",
+    #     author="Kepler",
+    #     cadence="long",
+    #     mission="Kepler",
+    #     delay=1.5
+    # )

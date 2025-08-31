@@ -326,7 +326,7 @@ def plot_tbl_mag_vs_bjd(tbl_filepath):
     plt.show()
 # Example usage:
 # plot_tbl_mag_vs_bjd('UID_0004024_PLC_001.tbl')
-def generate_uid_dict_from_final_csv(filepath):
+def generate_label_dict_from_toi_csv(filepath):
     """
     Reads final.csv, uses the first field (HIP_ID) to generate filenames,
     and the second field (Solution_Types) to create a dictionary:
@@ -335,14 +335,33 @@ def generate_uid_dict_from_final_csv(filepath):
     """
     df = pd.read_csv(filepath)
     id_col = df.columns[0]
-    sol_col = df.columns[1]
+    sol_col = df.columns[21]
     uid_dict = {}
     for idx, row in df.iterrows():
-        fname = f"UID_{str(row[id_col]).zfill(7)}_PLC_001.tbl"
+        id = f"{str(row[id_col])}"
         value = 1 if str(row[sol_col]).strip() in ['PC', 'CP'] else 0
-        uid_dict[fname] = value
+        print(f"id: {id}, value: {row[sol_col]}")
+        uid_dict[id] = value
     return uid_dict
-
+def generate_label_dict_from_koi_csv(filepath):
+    """
+    Reads final.csv, uses the first field (HIP_ID) to generate filenames,
+    and the second field (Solution_Types) to create a dictionary:
+    - key: filename like UID_0004024_PLC_001.tbl
+    - value: 1 if Solution_Types is 'PC' or 'CP', else 0
+    """
+    df = pd.read_csv(filepath, comment='#')
+    kepler_name = df.columns[3]
+    kepoi_name = df.columns[2]
+    sol_col = df.columns[4]
+    uid_dict = {}
+    for idx, row in df.iterrows():
+        # Method 1: Using conditional expression (one-liner)
+        id = f"{row['kepler_name']}".replace(" ", "-") if 'kepler_name' in row and not pd.isna(row['kepler_name']) else f"{row['kepoi_name']}".replace(" ", "_")
+        value = 1 if str(row[sol_col]).strip() in ['CONFIRMED'] else 0
+        # print(f"id: {id}, value: {row[sol_col]}")
+        uid_dict[id] = value
+    return uid_dict
 # Example usage:
 # uid_dict = generate_uid_dict_from_final_csv('final.csv')
 # print(uid_dict)
@@ -350,13 +369,13 @@ def main():
     # mapping_hipparcos_catalog_nasaconfirmed()
     # combined_catalog = combine_toi_koi('TOIs.csv', 'KOIs.csv', 'combined_catalog.csv')
     # map_combined_hipparcos()
-    fnames = generate_uid_filenames_with_pandas('final.csv')
-    print(fnames)
+    # fnames = generate_uid_filenames_with_pandas('final.csv')
+    # print(fnames)
     # map_combined_hipparcos()
     # combine_csv_files('cps.csv', 'fps.csv', 'final.csv')
     # plot_tbl_mag_vs_bjd('./data/UID_0001419_PLC_001.tbl')
-    # uid_dict = generate_uid_dict_from_final_csv('final.csv')
-    # print(uid_dict)
+    uid_dict = generate_label_dict_from_koi_csv('KOIs.csv')
+    print(uid_dict)
     # plot_tbl_mag_vs_bjd('./data/UID_0001931_PLC_001.tbl')
     # uid_dict = generate_uid_dict_from_final_csv('final.csv')
     # print(uid_dict)

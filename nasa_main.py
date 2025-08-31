@@ -12,6 +12,7 @@ import matplotlib.pyplot as plt
 from io import StringIO
 from scipy.signal import savgol_filter
 import lightkurve as lk
+import json
 
 # Function to convert string to integer for sorting
 def convert_to_int(x):
@@ -340,7 +341,7 @@ def generate_label_dict_from_toi_csv(filepath):
     for idx, row in df.iterrows():
         id = f"{str(row[id_col])}"
         value = 1 if str(row[sol_col]).strip() in ['PC', 'CP'] else 0
-        print(f"id: {id}, value: {row[sol_col]}")
+        # print(f"id: {id}, value: {row[sol_col]}")
         uid_dict[id] = value
     return uid_dict
 def generate_label_dict_from_koi_csv(filepath):
@@ -374,8 +375,18 @@ def main():
     # map_combined_hipparcos()
     # combine_csv_files('cps.csv', 'fps.csv', 'final.csv')
     # plot_tbl_mag_vs_bjd('./data/UID_0001419_PLC_001.tbl')
-    uid_dict = generate_label_dict_from_koi_csv('KOIs.csv')
-    print(uid_dict)
+    label_dict_koi = generate_label_dict_from_koi_csv('KOIs.csv')
+    # print(label_dict_koi)
+    label_dict_toi = generate_label_dict_from_toi_csv('TOIs.csv')
+    # print(label_dict_toi)
+     # Merge the two dictionaries, preferring TOI values if keys overlap
+    merged_label_dict = {**label_dict_koi, **label_dict_toi}
+    print("Merged label dict:")
+    # print(merged_label_dict)
+    # Output merged_label_dict to a JSON file
+    with open('merged_label_dict.json', 'w') as f:
+        json.dump(merged_label_dict, f, indent=2)
+    print("Merged label dict saved to merged_label_dict.json")
     # plot_tbl_mag_vs_bjd('./data/UID_0001931_PLC_001.tbl')
     # uid_dict = generate_uid_dict_from_final_csv('final.csv')
     # print(uid_dict)

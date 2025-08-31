@@ -366,6 +366,52 @@ def generate_label_dict_from_koi_csv(filepath):
 # Example usage:
 # uid_dict = generate_uid_dict_from_final_csv('final.csv')
 # print(uid_dict)
+def copy_fits_files_from_test_to_data(toi_test_data_folder, toi_data_folder):
+    """
+    Recursively searches for folders named as IDs under toi_test_data_folder,
+    finds all .fits files inside each ID folder and its subfolders,
+    and copies them to toi_data_folder/id/
+    """
+    for item in os.listdir(toi_test_data_folder):
+        id_path = os.path.join(toi_test_data_folder, item)
+        if os.path.isdir(id_path) and item.isdigit():
+            dest_dir = os.path.join(toi_data_folder, item)
+            os.makedirs(dest_dir, exist_ok=True)
+            # Recursively walk through all subfolders
+            for root, _, files in os.walk(id_path):
+                for fname in files:
+                    if fname.lower().endswith('.fits'):
+                        src_file = os.path.join(root, fname)
+                        dest_file = os.path.join(dest_dir, fname)
+                        shutil.copy2(src_file, dest_file)
+                        print(f"Copied {src_file} to {dest_file}")
+
+# Example usage:
+# copy_fits_files_from_test_to_data('toi_test_data', 'toi_data')
+def copy_fits_files_from_koi_test_to_data(koi_test_data_folder, koi_data_folder):
+    """
+    Recursively searches for folders named like KOI-K00113.01 or KOI-Kepler-1_b under koi_test_data_folder,
+    finds all .fits files inside each folder and its subfolders,
+    and copies them to koi_data/K00113.01 or koi_data/Kepler-1_b/
+    """
+    for item in os.listdir(koi_test_data_folder):
+        src_id_path = os.path.join(koi_test_data_folder, item)
+        if os.path.isdir(src_id_path) and (item.startswith("KOI-K")):
+            # Remove "KOI-" prefix for destination folder name
+            dest_id = item.replace("KOI-", "")
+            dest_dir = os.path.join(koi_data_folder, dest_id)
+            os.makedirs(dest_dir, exist_ok=True)
+            # Recursively walk through all subfolders
+            for root, _, files in os.walk(src_id_path):
+                for fname in files:
+                    if fname.lower().endswith('.fits'):
+                        src_file = os.path.join(root, fname)
+                        dest_file = os.path.join(dest_dir, fname)
+                        shutil.copy2(src_file, dest_file)
+                        print(f"Copied {src_file} to {dest_file}")
+
+# Example usage:
+# copy_fits_files_from_koi_test_to_data('koi_test_data', 'koi_data')
 def main():
     # mapping_hipparcos_catalog_nasaconfirmed()
     # combined_catalog = combine_toi_koi('TOIs.csv', 'KOIs.csv', 'combined_catalog.csv')
@@ -375,20 +421,22 @@ def main():
     # map_combined_hipparcos()
     # combine_csv_files('cps.csv', 'fps.csv', 'final.csv')
     # plot_tbl_mag_vs_bjd('./data/UID_0001419_PLC_001.tbl')
-    label_dict_koi = generate_label_dict_from_koi_csv('KOIs.csv')
-    # print(label_dict_koi)
-    label_dict_toi = generate_label_dict_from_toi_csv('TOIs.csv')
-    # print(label_dict_toi)
-     # Merge the two dictionaries, preferring TOI values if keys overlap
-    merged_label_dict = {**label_dict_koi, **label_dict_toi}
-    print("Merged label dict:")
-    # print(merged_label_dict)
-    # Output merged_label_dict to a JSON file
-    with open('merged_label_dict.json', 'w') as f:
-        json.dump(merged_label_dict, f, indent=2)
-    print("Merged label dict saved to merged_label_dict.json")
+    # label_dict_koi = generate_label_dict_from_koi_csv('KOIs.csv')
+    # # print(label_dict_koi)
+    # label_dict_toi = generate_label_dict_from_toi_csv('TOIs.csv')
+    # # print(label_dict_toi)
+    #  # Merge the two dictionaries, preferring TOI values if keys overlap
+    # merged_label_dict = {**label_dict_koi, **label_dict_toi}
+    # print("Merged label dict:")
+    # # print(merged_label_dict)
+    # # Output merged_label_dict to a JSON file
+    # with open('merged_label_dict.json', 'w') as f:
+    #     json.dump(merged_label_dict, f, indent=2)
+    # print("Merged label dict saved to merged_label_dict.json")
     # plot_tbl_mag_vs_bjd('./data/UID_0001931_PLC_001.tbl')
     # uid_dict = generate_uid_dict_from_final_csv('final.csv')
     # print(uid_dict)
+    # copy_fits_files_from_test_to_data('toi_test_data', 'toi_data')
+    copy_fits_files_from_koi_test_to_data('koi_test_data', 'koi_data')
 if __name__ == "__main__":
     main()

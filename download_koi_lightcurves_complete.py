@@ -182,7 +182,7 @@ if __name__ == "__main__":
         cadence="long",
         mission="Kepler",
         delay=2.0,  # Longer delay for safety
-        max_targets=3  # ONLY download first 3 targets for testing
+        max_targets=100  # ONLY download first 3 targets for testing
     )
     
     print("\nTest completed. Check the log above.")

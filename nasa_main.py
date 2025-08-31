@@ -412,6 +412,40 @@ def copy_fits_files_from_koi_test_to_data(koi_test_data_folder, koi_data_folder)
 
 # Example usage:
 # copy_fits_files_from_koi_test_to_data('koi_test_data', 'koi_data')
+def plot_first_id_fits_in_toi_data(toi_data_folder):
+    """
+    Counts ID folders under toi_data_folder, and only plots .fits files from the first ID folder found.
+    """
+    id_folders = [item for item in os.listdir(toi_data_folder)
+                  if os.path.isdir(os.path.join(toi_data_folder, item))]
+    print(f"Found {len(id_folders)} ID folders in {toi_data_folder}.")
+    if not id_folders:
+        print("No ID folders found.")
+        return
+
+    # Only plot for the first ID folder
+    id_folder = id_folders[0]
+    id_path = os.path.join(toi_data_folder, id_folder)
+    print(f"Plotting .fits files in: {id_folder}")
+    for fname in os.listdir(id_path):
+        if fname.lower().endswith('.fits'):
+            fits_path = os.path.join(id_path, fname)
+            try:
+                obj = lk.read(fits_path)
+                # If it's a TargetPixelFile, convert to lightcurve
+                if hasattr(obj, "to_lightcurve"):
+                    lc = obj.to_lightcurve()
+                else:
+                    lc = obj  # Assume it's already a LightCurve
+                # plt.figure(figsize=(10, 4))
+                lc.plot()
+                plt.title(f"{fname} ({id_folder})")
+                plt.show()
+            except Exception as e:
+                print(f"Could not plot {fits_path}: {e}")
+
+# Example usage:
+# plot_first_id_fits_in_toi_data('toi_data')
 def main():
     # mapping_hipparcos_catalog_nasaconfirmed()
     # combined_catalog = combine_toi_koi('TOIs.csv', 'KOIs.csv', 'combined_catalog.csv')
@@ -437,6 +471,7 @@ def main():
     # uid_dict = generate_uid_dict_from_final_csv('final.csv')
     # print(uid_dict)
     # copy_fits_files_from_toi_test_to_data('toi_test_data', 'toi_data')
-    copy_fits_files_from_koi_test_to_data('koi_test_data', 'koi_data')
+    # copy_fits_files_from_koi_test_to_data('koi_test_data', 'koi_data')
+    plot_first_id_fits_in_toi_data('toi_data')
 if __name__ == "__main__":
     main()

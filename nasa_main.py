@@ -366,7 +366,7 @@ def generate_label_dict_from_koi_csv(filepath):
 # Example usage:
 # uid_dict = generate_uid_dict_from_final_csv('final.csv')
 # print(uid_dict)
-def copy_fits_files_from_test_to_data(toi_test_data_folder, toi_data_folder):
+def copy_fits_files_from_toi_test_to_data(toi_test_data_folder, toi_data_folder):
     """
     Recursively searches for folders named as IDs under toi_test_data_folder,
     finds all .fits files inside each ID folder and its subfolders,
@@ -436,7 +436,7 @@ def main():
     # plot_tbl_mag_vs_bjd('./data/UID_0001931_PLC_001.tbl')
     # uid_dict = generate_uid_dict_from_final_csv('final.csv')
     # print(uid_dict)
-    # copy_fits_files_from_test_to_data('toi_test_data', 'toi_data')
+    # copy_fits_files_from_toi_test_to_data('toi_test_data', 'toi_data')
     copy_fits_files_from_koi_test_to_data('koi_test_data', 'koi_data')
 if __name__ == "__main__":
     main()

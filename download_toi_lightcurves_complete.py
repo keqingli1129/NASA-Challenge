@@ -63,7 +63,7 @@ def download_toi_lightcurves_complete(csv_file_path, download_dir="./toi_complet
     # Iterate through each TOI entry
     for index, row in toi_df.iterrows():
         # Construct identifiers - ADJUST THESE BASED ON YOUR CSV COLUMN NAMES!
-        toi_id = f"TOI-{row['TOI']}" if 'TOI' in row else f"TOI-{row['toi_num']}"
+        toi_id = f"{row['TIC ID']}" if 'TIC ID' in row else f"TOI-{row['toi_num']}"
         tic_id = f"TIC {row['TIC ID']}" if 'TIC ID' in row else None
         
         # Fallback: if standard column names aren't found, try common alternatives
@@ -81,7 +81,7 @@ def download_toi_lightcurves_complete(csv_file_path, download_dir="./toi_complet
         logger.info(f"Processing {toi_id} ({index + 1}/{len(toi_df)}) - TIC: {tic_id}")
         
         # Create a subdirectory for this target
-        target_dir = os.path.join(download_dir, toi_id.replace(' ', '_').replace('.', '_').replace('/', '_'))
+        target_dir = os.path.join(download_dir, toi_id.replace(' ', '_'))
         os.makedirs(target_dir, exist_ok=True)
         
         try:

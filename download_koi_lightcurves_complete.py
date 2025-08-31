@@ -64,8 +64,23 @@ def download_koi_lightcurves_complete(csv_file_path, download_dir="./koi_complet
     
     # Iterate through each KOI entry
     for index, row in koi_df.iterrows():
-        # Construct identifiers - ADJUST THESE BASED ON YOUR CSV COLUMN NAMES!
-        koi_id = f"KOI-{row['kepoi_name']}" if 'kepoi_name' in row else f"KOI-{row['KOI']}"
+        # Construct KOI identifier with multiple fallback options
+        koi_id = None
+
+        # Try different possible column names for KOI identifier
+        if 'kepler_name' in row and not pd.isna(row['kepler_name']):
+            koi_id = f"KOI-{row['kepler_name']}"
+        elif 'kepoi_name' in row and not pd.isna(row['kepoi_name']):
+            koi_id = f"KOI-{row['kepoi_name']}"
+        elif 'koi_name' in row and not pd.isna(row['koi_name']):
+            koi_id = f"KOI-{row['koi_name']}"
+        elif 'KOI' in row and not pd.isna(row['KOI']):
+            koi_id = f"KOI-{row['KOI']}"
+        else:
+            # If no KOI identifier found, we'll need to handle this case
+            logger.warning(f"No KOI identifier found for row {index}")
+            # You might want to skip this target or use another identifier
+            continue
         kic_id = f"KIC {row['kepid']}" if 'kepid' in row else None
         
         # Fallback: if standard column names aren't found, try common alternatives
@@ -83,7 +98,7 @@ def download_koi_lightcurves_complete(csv_file_path, download_dir="./koi_complet
         logger.info(f"Processing {koi_id} ({index + 1}/{len(koi_df)}) - KIC: {kic_id}")
         
         # Create a subdirectory for this target
-        target_dir = os.path.join(download_dir, koi_id.replace(' ', '_').replace('.', '_').replace('/', '_'))
+        target_dir = os.path.join(download_dir, koi_id.replace(' ', '_'))
         os.makedirs(target_dir, exist_ok=True)
         
         try:

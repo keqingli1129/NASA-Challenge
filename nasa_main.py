@@ -425,6 +425,7 @@ def plot_first_id_fits_in_toi_data(toi_data_folder):
 
     # Only plot for the first ID folder
     id_folder = id_folders[0]
+    id_folder = 'Kepler-106_b'
     id_path = os.path.join(toi_data_folder, id_folder)
     print(f"Plotting .fits files in: {id_folder}")
     for fname in os.listdir(id_path):
@@ -438,14 +439,56 @@ def plot_first_id_fits_in_toi_data(toi_data_folder):
                 else:
                     lc = obj  # Assume it's already a LightCurve
                 # plt.figure(figsize=(10, 4))
-                lc.plot()
-                plt.title(f"{fname} ({id_folder})")
+                # num_points = len(lc.time)
+                # print(f"Number of data points in light curve: {num_points}")    
+                # Prepare FFT of flux data
+                flux = lc.flux.value
+                flux = flux[~np.isnan(flux)]  # Remove NaNs
+                flux_norm = (flux - np.mean(flux)) / np.std(flux)
+
+                fft_vals = np.fft.fft(flux_norm)
+                fft_freq = np.fft.fftfreq(len(flux_norm), d=np.median(np.diff(lc.time.value)))
+
+                pos_mask = fft_freq > 0
+                freqs = fft_freq[pos_mask]
+                amplitudes = np.abs(fft_vals[pos_mask])
+
+                # Plot side by side
+                fig, axs = plt.subplots(1, 2, figsize=(14, 4))
+
+                # Light curve plot
+                lc.plot(ax=axs[0])
+                axs[0].set_title(f"Light Curve: {fname} ({id_folder})")
+
+                # FFT plot
+                axs[1].plot(freqs, amplitudes)
+                axs[1].set_xlabel('Frequency')
+                axs[1].set_ylabel('Amplitude')
+                axs[1].set_title('FFT Spectrum')
+
+                plt.tight_layout()
                 plt.show()
             except Exception as e:
                 print(f"Could not plot {fits_path}: {e}")
 
 # Example usage:
 # plot_first_id_fits_in_toi_data('toi_data')
+def load_json_to_dict(filepath):
+    """
+    Loads a JSON file and returns its contents as a Python dictionary.
+    
+    Args:
+        filepath (str): Path to the JSON file.
+        
+    Returns:
+        dict: Dictionary containing the JSON data.
+    """
+    with open(filepath, 'r', encoding='utf-8') as f:
+        data = json.load(f)
+    return data
+
+# Example usage:
+# my_dict = load_json_to_dict('merged_label_dict.json')
 def main():
     # mapping_hipparcos_catalog_nasaconfirmed()
     # combined_catalog = combine_toi_koi('TOIs.csv', 'KOIs.csv', 'combined_catalog.csv')
@@ -472,6 +515,8 @@ def main():
     # print(uid_dict)
     # copy_fits_files_from_toi_test_to_data('toi_test_data', 'toi_data')
     # copy_fits_files_from_koi_test_to_data('koi_test_data', 'koi_data')
-    plot_first_id_fits_in_toi_data('toi_data')
+    plot_first_id_fits_in_toi_data('koi_data')
+    # my_dict = load_json_to_dict('merged_label_dict.json')
+    # print('done')
 if __name__ == "__main__":
     main()

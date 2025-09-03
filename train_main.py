@@ -14,6 +14,9 @@ import io
 from lightcurvedataset import LightCurveDataset
 from exoplanet import ExoplanetCNN
 from nasa_main import load_json_to_dict
+from torch.utils.tensorboard import SummaryWriter
+import datetime
+
 # Set device
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 print(f"Using device: {device}")
@@ -52,9 +55,16 @@ def create_dataset(data_folder):
     return LightCurveDataset(fits_files, labels, transform=transform)
 
 # 5. Training Function
-def train_model(model, dataloader, criterion, optimizer, num_epochs=10):
+def train_model(model, dataloader, criterion, optimizer, num_epochs=10, log_dir="exoplanet"):
     model.train()
     best_loss = float('inf')
+     # Add date and time to log folder name
+    if log_dir is None:
+        now = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+        log_dir = f"exoplanet_{now}"
+    else:
+        log_dir = f"{log_dir}_{now}"
+    writer = SummaryWriter(log_dir=log_dir)  # TensorBoard writer
 
     for epoch in range(num_epochs):
         running_loss = 0.0
@@ -77,6 +87,9 @@ def train_model(model, dataloader, criterion, optimizer, num_epochs=10):
             correct += (predicted == target).sum().item()
             total += target.size(0)
             
+            # Log batch loss to TensorBoard
+            global_step = epoch * len(dataloader) + batch_idx
+            writer.add_scalar('Batch/Loss', loss.item(), global_step)
             if batch_idx % 10 == 0:
                 print(f'Epoch {epoch+1}/{num_epochs}, Batch {batch_idx}, Loss: {loss.item():.4f}')
         
@@ -84,6 +97,9 @@ def train_model(model, dataloader, criterion, optimizer, num_epochs=10):
         epoch_acc = correct / total
         print(f'Epoch {epoch+1} completed. Loss: {epoch_loss:.4f}, Accuracy: {epoch_acc:.4f}')
 
+        # Log epoch loss and accuracy to TensorBoard
+        writer.add_scalar('Epoch/Loss', epoch_loss, epoch)
+        writer.add_scalar('Epoch/Accuracy', epoch_acc, epoch)
         # Save model with loss in filename if loss improves
         if epoch_loss < best_loss:
             best_loss = epoch_loss
@@ -91,6 +107,7 @@ def train_model(model, dataloader, criterion, optimizer, num_epochs=10):
             torch.save(model.state_dict(), model_filename)
             print(f"Model saved as '{model_filename}'")
     
+    writer.close()
     return model
 
 # 6. Main execution

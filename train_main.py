@@ -54,7 +54,8 @@ def create_dataset(data_folder):
 # 5. Training Function
 def train_model(model, dataloader, criterion, optimizer, num_epochs=10):
     model.train()
-    
+    best_loss = float('inf')
+
     for epoch in range(num_epochs):
         running_loss = 0.0
         correct = 0
@@ -82,6 +83,13 @@ def train_model(model, dataloader, criterion, optimizer, num_epochs=10):
         epoch_loss = running_loss / len(dataloader)
         epoch_acc = correct / total
         print(f'Epoch {epoch+1} completed. Loss: {epoch_loss:.4f}, Accuracy: {epoch_acc:.4f}')
+
+        # Save model with loss in filename if loss improves
+        if epoch_loss < best_loss:
+            best_loss = epoch_loss
+            model_filename = f"exoplanet_cnn_loss_{best_loss:.4f}.pth"
+            torch.save(model.state_dict(), model_filename)
+            print(f"Model saved as '{model_filename}'")
     
     return model
 
@@ -105,21 +113,21 @@ if __name__ == "__main__":
     print("Model saved as 'exoplanet_cnn.pth'")
     
     # Example prediction function
-    def predict_exoplanet(fits_path, model, transform):
-        """Predict if a FITS file contains an exoplanet"""
-        model.eval()
-        with torch.no_grad():
-            # Create a single-item dataset
-            dummy_dataset = LightCurveDataset([fits_path], [0], transform=transform)
-            image, _ = dummy_dataset[0]
-            image = image.unsqueeze(0).to(device)  # Add batch dimension
+    # def predict_exoplanet(fits_path, model, transform):
+    #     """Predict if a FITS file contains an exoplanet"""
+    #     model.eval()
+    #     with torch.no_grad():
+    #         # Create a single-item dataset
+    #         dummy_dataset = LightCurveDataset([fits_path], [0], transform=transform)
+    #         image, _ = dummy_dataset[0]
+    #         image = image.unsqueeze(0).to(device)  # Add batch dimension
             
-            output = model(image)
-            probability = output.item()
-            prediction = "Exoplanet" if probability > 0.5 else "No exoplanet"
+    #         output = model(image)
+    #         probability = output.item()
+    #         prediction = "Exoplanet" if probability > 0.5 else "No exoplanet"
             
-            print(f"Prediction: {prediction} (Probability: {probability:.4f})")
-            return probability
+    #         print(f"Prediction: {prediction} (Probability: {probability:.4f})")
+    #         return probability
     
     # Example prediction (would need a real FITS file)
     # predict_exoplanet('your_file.fits', trained_model, transform)

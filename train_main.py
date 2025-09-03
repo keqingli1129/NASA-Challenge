@@ -5,7 +5,7 @@ from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms
 import numpy as np
 import matplotlib.pyplot as plt
-from astropy.stats import BoxLeastSquares
+from astropy.timeseries import BoxLeastSquares
 import lightkurve as lk
 from astropy.io import fits
 import os
@@ -13,7 +13,7 @@ from PIL import Image
 import io
 from lightcurvedataset import LightCurveDataset
 from exoplanet import ExoplanetCNN
-
+from nasa_main import load_json_to_dict
 # Set device
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 print(f"Using device: {device}")
@@ -25,13 +25,31 @@ transform = transforms.Compose([
 ])
 
 # 4. Example usage with dummy data
-def create_dummy_dataset():
+def create_dataset(data_folder):
     """Create a small dummy dataset for demonstration"""
     # In practice, you would have real FITS file paths and labels
-    dummy_files = ['dummy_file_1.fits', 'dummy_file_2.fits'] * 5
-    dummy_labels = [1, 0] * 5  # Alternating labels
-    
-    return LightCurveDataset(dummy_files, dummy_labels, transform=transform)
+    # dummy_files = ['dummy_file_1.fits', 'dummy_file_2.fits'] * 5
+    # dummy_labels = [1, 0] * 5  # Alternating labels
+    labels_dict = load_json_to_dict('merged_label_dict.json')
+    fits_files = []
+    labels = []
+    """
+    Counts ID folders under data_folder, and only plots .fits files from the first ID folder found.
+    """
+    id_folders = [item for item in os.listdir(data_folder)
+                  if os.path.isdir(os.path.join(data_folder, item))]
+    print(f"Found {len(id_folders)} ID folders in {data_folder}.")
+    if not id_folders:
+        print("No ID folders found.")
+        return
+    for id_folder in id_folders:
+        id_path = os.path.join(data_folder, id_folder)
+        for fname in os.listdir(id_path):
+            if fname.lower().endswith('.fits'):
+                fits_path = os.path.join(id_path, fname)
+                fits_files.append(fits_path)
+                labels.append(labels_dict.get(id_folder, 0))  # Get label for the ID folder
+    return LightCurveDataset(fits_files, labels, transform=transform)
 
 # 5. Training Function
 def train_model(model, dataloader, criterion, optimizer, num_epochs=10):
@@ -69,8 +87,8 @@ def train_model(model, dataloader, criterion, optimizer, num_epochs=10):
 
 # 6. Main execution
 if __name__ == "__main__":
-    # Create dummy dataset (replace with your actual data)
-    dataset = create_dummy_dataset()
+    # Create dataset (replace with your actual data)
+    dataset = create_dataset('koi_data')
     dataloader = DataLoader(dataset, batch_size=4, shuffle=True, num_workers=0)
     
     # Initialize model, loss, and optimizer

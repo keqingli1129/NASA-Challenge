@@ -5,7 +5,7 @@ from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms
 import numpy as np
 import matplotlib.pyplot as plt
-from astropy.stats import BoxLeastSquares
+from astropy.timeseries import BoxLeastSquares
 import lightkurve as lk
 from astropy.io import fits
 import os

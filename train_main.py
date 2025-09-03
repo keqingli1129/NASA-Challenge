@@ -16,6 +16,7 @@ from exoplanet import ExoplanetCNN
 from nasa_main import load_json_to_dict
 from torch.utils.tensorboard import SummaryWriter
 import datetime
+from torch.utils.data import random_split
 
 # Set device
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -117,7 +118,14 @@ def train_model(model, dataloader, criterion, optimizer, num_epochs=10, log_dir=
 if __name__ == "__main__":
     # Create dataset (replace with your actual data)
     dataset = create_dataset('koi_data')
-    dataloader = DataLoader(dataset, batch_size=4, shuffle=True, num_workers=0)
+     # Split dataset into train and test sets (e.g., 80% train, 20% test)
+    train_size = int(0.8 * len(dataset))
+    test_size = len(dataset) - train_size
+    train_dataset, test_dataset = random_split(dataset, [train_size, test_size])
+
+    # Create DataLoaders for train and test sets
+    train_loader = DataLoader(train_dataset, batch_size=4, shuffle=True, num_workers=0)
+    test_loader = DataLoader(test_dataset, batch_size=4, shuffle=False, num_workers=0)
     
     # Initialize model, loss, and optimizer
     model = ExoplanetCNN().to(device)
@@ -126,28 +134,30 @@ if __name__ == "__main__":
     
     # Train the model
     print("Starting training...")
-    trained_model = train_model(model, dataloader, criterion, optimizer, num_epochs=5)
+    trained_model = train_model(model, train_loader, criterion, optimizer, num_epochs=5)
     
     # Save the trained model
     torch.save(trained_model.state_dict(), 'exoplanet_cnn.pth')
     print("Model saved as 'exoplanet_cnn.pth'")
     
     # Example prediction function
-    # def predict_exoplanet(fits_path, model, transform):
-    #     """Predict if a FITS file contains an exoplanet"""
-    #     model.eval()
-    #     with torch.no_grad():
-    #         # Create a single-item dataset
-    #         dummy_dataset = LightCurveDataset([fits_path], [0], transform=transform)
-    #         image, _ = dummy_dataset[0]
-    #         image = image.unsqueeze(0).to(device)  # Add batch dimension
-            
-    #         output = model(image)
-    #         probability = output.item()
-    #         prediction = "Exoplanet" if probability > 0.5 else "No exoplanet"
-            
-    #         print(f"Prediction: {prediction} (Probability: {probability:.4f})")
-    #         return probability
-    
-    # Example prediction (would need a real FITS file)
-    # predict_exoplanet('your_file.fits', trained_model, transform)
+    def predict_exoplanet(test_loader, model):
+        """
+        Predict exoplanet probabilities for all samples in the test_loader.
+        Prints prediction and probability for each sample.
+        """
+        model.eval()
+        results = []
+        with torch.no_grad():
+            for batch_idx, (data, _) in enumerate(test_loader):
+                data = data.to(device)
+                outputs = model(data)
+                probabilities = outputs.squeeze().cpu().numpy()
+                for i, prob in enumerate(np.atleast_1d(probabilities)):
+                    prediction = "Exoplanet" if prob > 0.5 else "No exoplanet"
+                    print(f"Sample {batch_idx * test_loader.batch_size + i}: Prediction: {prediction} (Probability: {prob:.4f})")
+                    results.append(prob)
+        return results
+
+    # Example usage after training:
+    # predict_exoplanet(test_loader, trained_model)

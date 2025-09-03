@@ -13,6 +13,7 @@ from PIL import Image
 import io
 from lightcurvedataset import LightCurveDataset
 from exoplanet import ExoplanetCNN
+from exoplanetresnet import ExoplanetResNet
 from nasa_main import load_json_to_dict
 from torch.utils.tensorboard import SummaryWriter
 import datetime
@@ -129,6 +130,8 @@ if __name__ == "__main__":
     
     # Initialize model, loss, and optimizer
     model = ExoplanetCNN().to(device)
+    # using ResNet18
+    # model = ExoplanetResNet().to(device)
     criterion = nn.BCELoss()  # Binary Cross Entropy Loss
     optimizer = optim.Adam(model.parameters(), lr=0.001, weight_decay=1e-5)
     

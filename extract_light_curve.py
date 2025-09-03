@@ -28,7 +28,7 @@ def extract_light_curve(fits_file_path):
 def main(fitsfile):
     time, flux, flux_err = extract_light_curve(fitsfile)
     plt.figure(figsize=(10, 4))
-    plt.plot(time, flux, 'k.', linewidth=1)
+    plt.plot(time, flux, 'k-', linewidth=1)
     plt.xlabel('Time (days)')
     plt.ylabel('Normalized Flux')
     plt.title('Raw Light Curve')

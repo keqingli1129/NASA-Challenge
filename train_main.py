@@ -55,7 +55,7 @@ def create_dataset(data_folder):
     return LightCurveDataset(fits_files, labels, transform=transform)
 
 # 5. Training Function
-def train_model(model, dataloader, criterion, optimizer, num_epochs=10, log_dir="exoplanet"):
+def train_model(model, dataloader, criterion, optimizer, num_epochs=10, log_dir="exoplanet", stop_loss=None):
     model.train()
     best_loss = float('inf')
      # Add date and time to log folder name
@@ -106,7 +106,10 @@ def train_model(model, dataloader, criterion, optimizer, num_epochs=10, log_dir=
             model_filename = f"exoplanet_cnn_loss_{best_loss:.4f}.pth"
             torch.save(model.state_dict(), model_filename)
             print(f"Model saved as '{model_filename}'")
-    
+        # Stop training if loss is below threshold
+        if stop_loss is not None and epoch_loss <= stop_loss:
+            print(f"Stopping early: loss {epoch_loss:.4f} reached threshold {stop_loss}")
+            break
     writer.close()
     return model
 

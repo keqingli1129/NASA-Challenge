@@ -358,7 +358,7 @@ def generate_label_dict_from_koi_csv(filepath):
     uid_dict = {}
     for idx, row in df.iterrows():
         # Method 1: Using conditional expression (one-liner)
-        id = f"{row['kepler_name']}".replace(" ", "-") if 'kepler_name' in row and not pd.isna(row['kepler_name']) else f"{row['kepoi_name']}".replace(" ", "_")
+        id = f"{row['kepler_name']}".replace(" ", "_") if 'kepler_name' in row and not pd.isna(row['kepler_name']) else f"{row['kepoi_name']}".replace(" ", "_")
         value = 1 if str(row[sol_col]).strip() in ['CONFIRMED'] else 0
         # print(f"id: {id}, value: {row[sol_col]}")
         uid_dict[id] = value
@@ -498,24 +498,24 @@ def main():
     # map_combined_hipparcos()
     # combine_csv_files('cps.csv', 'fps.csv', 'final.csv')
     # plot_tbl_mag_vs_bjd('./data/UID_0001419_PLC_001.tbl')
-    # label_dict_koi = generate_label_dict_from_koi_csv('KOIs.csv')
-    # # print(label_dict_koi)
-    # label_dict_toi = generate_label_dict_from_toi_csv('TOIs.csv')
-    # # print(label_dict_toi)
-    #  # Merge the two dictionaries, preferring TOI values if keys overlap
-    # merged_label_dict = {**label_dict_koi, **label_dict_toi}
-    # print("Merged label dict:")
-    # # print(merged_label_dict)
-    # # Output merged_label_dict to a JSON file
-    # with open('merged_label_dict.json', 'w') as f:
-    #     json.dump(merged_label_dict, f, indent=2)
-    # print("Merged label dict saved to merged_label_dict.json")
+    label_dict_koi = generate_label_dict_from_koi_csv('KOIs.csv')
+    # print(label_dict_koi)
+    label_dict_toi = generate_label_dict_from_toi_csv('TOIs.csv')
+    # print(label_dict_toi)
+     # Merge the two dictionaries, preferring TOI values if keys overlap
+    merged_label_dict = {**label_dict_koi, **label_dict_toi}
+    print("Merged label dict:")
+    # print(merged_label_dict)
+    # Output merged_label_dict to a JSON file
+    with open('merged_label_dict.json', 'w') as f:
+        json.dump(merged_label_dict, f, indent=2)
+    print("Merged label dict saved to merged_label_dict.json")
     # plot_tbl_mag_vs_bjd('./data/UID_0001931_PLC_001.tbl')
     # uid_dict = generate_uid_dict_from_final_csv('final.csv')
     # print(uid_dict)
     # copy_fits_files_from_toi_test_to_data('toi_test_data', 'toi_data')
     # copy_fits_files_from_koi_test_to_data('koi_test_data', 'koi_data')
-    plot_first_id_fits_in_toi_data('koi_data')
+    # plot_first_id_fits_in_toi_data('koi_data')
     # my_dict = load_json_to_dict('merged_label_dict.json')
     # print('done')
 if __name__ == "__main__":
